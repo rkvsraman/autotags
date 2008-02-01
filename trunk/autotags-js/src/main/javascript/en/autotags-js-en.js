@@ -128,9 +128,6 @@ AUTOTAGS.createTagger.prototype = {
 		
 		// Splitting tokens into individual terms
 		var tokensToProcess = textWithWhitespaceAndStopwordsRemoved.split(' ');
-
-		// var test2 = 'hello ##!## johnny '.split(' ');
-		// alert( test2.length + ' ' + AUTOTAGS._arrayContains( test2,  AUTOTAGS.BOUNDARY ) );
 		
 		/*
 		*
