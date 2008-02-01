@@ -373,7 +373,7 @@ AUTOTAGS.createTagger.prototype = {
 		
 		var splitTerm = compoundTerm.split( ' ' );
 		
-		for ( var i = 0; i < splitTerm.length; i++ ) {
+		for ( var i = 0, length = splitTerm.length; i < length; i++ ) {
 			var position = i;
 
 			var token1 = splitTerm[position];
@@ -672,7 +672,7 @@ AUTOTAGS._arrayContains = function( array, obj ) {
 	try {
 		return array.indexOf( obj ) > -1;
 	} catch ( e ) {
-		for ( var i in array ) {
+		for ( var i = 0, length = array.length; i < length; i++ ) {
 			if (array[i] == obj) {
 				return true;
 			}
