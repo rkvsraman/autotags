@@ -139,7 +139,7 @@ AUTOTAGS.createTagger.prototype = {
 		*/
 		
 		// Identifying all single term candidates
-		for ( var i = 0; i < tokensToProcess.length; i++ ) {
+		for ( var i = 0, length = tokensToProcess.length; i < length; i++ ) {
 			var token = tokensToProcess[i];
 			
 			if ( token.length > this.TOKEN_LENGTH_CUTOFF ) {
@@ -156,7 +156,7 @@ AUTOTAGS.createTagger.prototype = {
 		var capitalizedNGrams = textWithBoundaryMarkers.match( this.CAPITALIZED_NGRAM_EXPRESSION );
 		
 		if ( capitalizedNGrams != null ) {
-			for ( var i = 0; i < capitalizedNGrams.length; i++ ) {
+			for ( var i = 0, length = capitalizedNGrams.length; i < length; i++ ) {
 				var compoundTermValue = capitalizedNGrams[i];
 
 				// The compound term should not start with a word from the blacklist
@@ -174,7 +174,7 @@ AUTOTAGS.createTagger.prototype = {
 		// Identifying bi-grams in the text
 		var bigrams = textWithBoundaryMarkers.split(' ');
 		
-		for ( var i = 0; i < bigrams.length; i++ ) {
+		for ( var i = 0, length = bigrams.length; i < length; i++ ) {
 			var position = i;
 			
 			var token1 = bigrams[position];
@@ -205,7 +205,7 @@ AUTOTAGS.createTagger.prototype = {
 		// The order in which the frequency lists are analyzed is important!!!
 		var frequencyLists = [ frequencyListSingleTerms, frequencyListCapitalisedCompoundTerms, frequencyListSimpleBigramTerms ];
 		
-		for ( var listId = 0; listId < frequencyLists.length; listId++ ) {
+		for ( var listId = 0, length = frequencyLists.length; listId < length; listId++ ) {
 			var listBeingProcessed = frequencyLists[listId];
 			
 			// Analyzing all terms within the list
