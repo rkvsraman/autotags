@@ -33,8 +33,7 @@
 var AUTOTAGS = {
 	'NAME' : 'AutoTags',
 	'VERSION' : 1.0,
-	'DEFAULT_SEPARATION' : 0,
-	'SPACE_SEPARATION' : 1,
+	'DEFAULT_SEPARATION' : ' ',
 	'APPLY_STEMMING' : true, // If true then the Porter stemmer should be applied to all tokens (but not phrases or n-grams), this has some overhead
 	'BOUNDARY' : '##!##' // Compound terms will not be created across BOUNDARIES
 };
@@ -340,9 +339,9 @@ AUTOTAGS.createTagger.prototype = {
 				}
 			}
 			
-			if ( this.SEPARATION == AUTOTAGS.SPACE_SEPARATION ) {
-				term.setValue( term.getValue().replace( / /g, '' ) );
-				temporaryTagSet.SEPARATOR = ' ';
+			if ( this.SEPARATION != AUTOTAGS.DEFAULT_SEPARATION ) {
+				term.setValue( term.getValue().replace( / /g, this.SEPARATION ) );
+				temporaryTagSet.SEPARATOR = this.SEPARATION;
 			}
 			
 			tagSetToBeReturned.addTag( term );
@@ -563,7 +562,11 @@ AUTOTAGS.TagSet.prototype = {
 		return this.tags;
 	},
 	
-	toString : function() {
+	toString : function( separator ) {
+		if ( separator != undefined ) {
+			this.SEPARATOR = separator;
+		}
+		
 		return this.tags.join( this.SEPARATOR );
 	},
 	

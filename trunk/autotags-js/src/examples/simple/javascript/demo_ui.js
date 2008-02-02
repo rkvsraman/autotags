@@ -17,9 +17,9 @@ window.onload = function() {
 	//
 }
 
-function setSeparator( spaceSeparation ) {
-	if ( spaceSeparation ) {
-		autoTags.SEPARATION = AUTOTAGS.SPACE_SEPARATION;
+function setSeparator( useUnderscore ) {
+	if ( useUnderscore ) {
+		autoTags.SEPARATION = '_';
 	} else {
 		autoTags.SEPARATION = AUTOTAGS.DEFAULT_SEPARATION;
 	}
@@ -74,7 +74,7 @@ function generateTags( text, termCount, debug ) {
 	//
 	var tagSet = autoTags.analyzeText( text, termCount );
 	//
-	
+
 	this.debug = debug;
 	var debugTable;
 	var debugTableBody;

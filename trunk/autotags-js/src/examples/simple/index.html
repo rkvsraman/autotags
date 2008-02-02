@@ -20,8 +20,8 @@
 				<input type="text" id="txtTags">
 				<p>Number of Tags to Generate: <input type="text" id="termCount" size="3" value="10">
 					<input type="button" onclick="if ( Number(termCount.value) >= 5) termCount.value = Number(termCount.value) - 5; generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );" value="Less"><input type="button" onclick="termCount.value = Number(termCount.value) + 5; generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );" value="More">
-					<input type="checkbox" id="chkDebug" onclick="generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );"> Debug
-					<input type="checkbox" id="chkSpaceSeparation" onclick="setSeparator( this.checked ); generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );"> Space Separation <input type="submit" value="Analyze &rarr;" ><br>
+					<input type="checkbox" id="chkSpaceSeparation" onclick="setSeparator( this.checked ); generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );"> Use underscore 
+					<input type="checkbox" id="chkDebug" onclick="generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );"> Debug <input type="submit" value="Analyze &rarr;" ><br>
 					<input type="checkbox" id="chkCompoundBoost" onclick="setCompoundBoost( this.checked ); generateTags( document.textForm.textToAnalyze.value, document.textForm.termCount.value, chkDebug.checked );"> I prefer concepts to single terms
 				</p>
 				<div id="messageContainer" class="label"></div>
