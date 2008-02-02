@@ -33,7 +33,7 @@
 var AUTOTAGS = {
 	'NAME' : 'AutoTags',
 	'VERSION' : 1.0,
-	'DEFAULT_SEPARATION' : ' ',
+	'DEFAULT_COMPOUND_TAG_SEPARATOR' : ' ',
 	'APPLY_STEMMING' : true, // If true then the Porter stemmer should be applied to all tokens (but not phrases or n-grams), this has some overhead
 	'BOUNDARY' : '##!##' // Compound terms will not be created across BOUNDARIES
 };
@@ -64,7 +64,7 @@ AUTOTAGS.createTagger = function( parameters ) {
 	this.BIGRAM_ALREADY_DETECTED_BOOST = 0.25; // This boost is applied to all bigrams found to be wholly contained within a compound term detected based on capitalisation
 	this.TERM_FROM_COMPOUND_DOWNWEIGHT = 0.25; // This is applied to individual tokens within an n-gram (every time an n-gram is discovered)
 	
-	this.SEPARATION = AUTOTAGS.DEFAULT_SEPARATION;
+	this.COMPOUND_TAG_SEPARATOR = AUTOTAGS.DEFAULT_COMPOUND_TAG_SEPARATOR; // Intra-tag (e.g. cool_gadget vs. cool gadget) separator to use
 	
 	// Remove all whitespace characters (certain white space characters are turned into boundaries)
 	this.WHITESPACE_EXPRESSION = /(\')?([^a-zA-Z0-9_\.\!\?\:\;\n\r\f\t])/g;
@@ -339,9 +339,8 @@ AUTOTAGS.createTagger.prototype = {
 				}
 			}
 			
-			if ( this.SEPARATION != AUTOTAGS.DEFAULT_SEPARATION ) {
-				term.setValue( term.getValue().replace( / /g, this.SEPARATION ) );
-				temporaryTagSet.SEPARATOR = this.SEPARATION;
+			if ( this.COMPOUND_TAG_SEPARATOR != AUTOTAGS.DEFAULT_COMPOUND_TAG_SEPARATOR ) {
+				term.setValue( term.getValue().replace( / /g, this.COMPOUND_TAG_SEPARATOR ) );
 			}
 			
 			tagSetToBeReturned.addTag( term );
@@ -538,7 +537,7 @@ AUTOTAGS.Term.prototype = {
 */
 AUTOTAGS.TagSet = function( parameters ) {
 	this.tags = new Array();
-	this.SEPARATOR = ', ';
+	this.TAG_SEPARATOR = ', ';
 	
 	if ( typeof parameters != 'undefined' ) {
 		for ( var property in parameters ) {
@@ -564,10 +563,10 @@ AUTOTAGS.TagSet.prototype = {
 	
 	toString : function( separator ) {
 		if ( separator != undefined ) {
-			this.SEPARATOR = separator;
+			this.TAG_SEPARATOR = separator;
 		}
 		
-		return this.tags.join( this.SEPARATOR );
+		return this.tags.join( this.TAG_SEPARATOR );
 	},
 	
 	sortByScore : function() {

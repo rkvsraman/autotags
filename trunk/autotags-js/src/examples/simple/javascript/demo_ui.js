@@ -19,9 +19,9 @@ window.onload = function() {
 
 function setSeparator( useUnderscore ) {
 	if ( useUnderscore ) {
-		autoTags.SEPARATION = '_';
+		autoTags.COMPOUND_TAG_SEPARATOR = '_';
 	} else {
-		autoTags.SEPARATION = AUTOTAGS.DEFAULT_SEPARATION;
+		autoTags.COMPOUND_TAG_SEPARATOR = AUTOTAGS.DEFAULT_COMPOUND_TAG_SEPARATOR;
 	}
 }
 
