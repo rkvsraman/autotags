@@ -104,8 +104,8 @@ function generateTags( text, termCount, debug ) {
 		debugTableHeader.appendChild( tableHeaderRow );
 	}
 	
-	for ( term in tagSet.tags ) {
-		var tag = tagSet.tags[term];
+	for ( var t = 0, length = tagSet.tags.length; t < length; t++ ) {
+		var tag = tagSet.tags[t];
 		tagsContainer.appendChild( getHtmlTagElement(tag) );
 		
 		if ( this.debug ) {
