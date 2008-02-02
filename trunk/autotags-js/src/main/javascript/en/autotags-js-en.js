@@ -720,7 +720,7 @@ AUTOTAGS.BLACKLIST = [ AUTOTAGS.BOUNDARY,'a','about','above','across','after','a
 	'much','must','my','myself','name','namely','neither','never','nevertheless','next','nine','no','nobody',
 	'none','noone','nor','not','nothing','now','nowhere','of','off','often','ok','on','once','one','only','onto',
 	'or','other','others','otherwise','our','ours','ourselves','out','over','own','part','per','percent','perhaps',
-	'please','put','quite','rather','re','read','remain','remains','s','said','sake','same','say','says','see',
+	'please','put','quite','rather','re','read','remain','remains','s','said','sake','same','say','says','saw','see',
 	'seem','seemed','seeming','seems','serious','several','she','should','show','side','since','sincere','six',
 	'sixty','so','some','somehow','someone','something','sometime','sometimes','somewhere','still','such',
 	'system','t','take','takes','tell','ten','than','that','the','their','them','themselves','then','thence',
