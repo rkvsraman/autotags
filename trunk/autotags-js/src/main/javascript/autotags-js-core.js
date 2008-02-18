@@ -175,7 +175,6 @@ AUTOTAGS.createTagger.prototype = {
 			
 			var token1 = bigrams[position];
 			var token2 = bigrams[position + 1];
-			
 			if ( token1 != undefined && token2 != undefined && (token1.length > 2 && token2.length > 2 ) && this.isInBlackList(token1) == false && this.isInBlackList(token2) == false ) {
 				var bigram = token1 + ' ' + token2;
 				var term = new AUTOTAGS.Term({ 'termType': AUTOTAGS.TermConstants.TYPE_SIMPLE_BIGRAM_TERM, 'boost':this.BIGRAM_BOOST });
@@ -421,7 +420,7 @@ AUTOTAGS.createTagger.prototype = {
 	},
 
 	isInBlackList : function( term ) {
-		if ( term != AUTOTAGS.BOUNDARY && ( AUTOTAGS.BLACKLIST != undefined && AUTOTAGS.BLACKLIST[term] != true ) ) {
+		if ( term != AUTOTAGS.BOUNDARY && ( AUTOTAGS.BLACKLIST != undefined && AUTOTAGS.BLACKLIST[term.toLowerCase()] != true ) ) {
 			return false;
 		} else {
 			return true;
