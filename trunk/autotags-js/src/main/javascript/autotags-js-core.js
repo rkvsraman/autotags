@@ -18,7 +18,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
-*	@version 1.0
+*	@version 1.1
 *
 *	TODO Remove redundant lowercasing
 *	TODO Choose best inflection after stemming (based on frequency)
@@ -32,7 +32,7 @@
 
 var AUTOTAGS = {
 	'NAME' : 'AutoTags',
-	'VERSION' : 1.0,
+	'VERSION' : 1.1,
 	'DEFAULT_COMPOUND_TAG_SEPARATOR' : ' ',
 	'APPLY_STEMMING' : true, // If true then the Porter stemmer should be applied to all tokens (but not phrases or n-grams), this has some overhead
 	'BOUNDARY' : '##!##' // Compound terms will not be created across BOUNDARIES
@@ -52,14 +52,17 @@ AUTOTAGS.createTagger = function( parameters ) {
 	*/
 	this.REMOVE_SHORT_NUMBERS_AS_SINGLE_TOKENS = true; // Remove all numbers with 4 digits or less
 	this.LOWERCASE = true; // If true all terms are lowercased before returning
+	this.EXTRACT_SPECIAL_TERMS = true; // Extract abbreviations, acronyms and CamelCase words.
 	
 	this.TOKEN_LENGTH_CUTOFF = 2; // Only consider single tokens that are longer than n characters
 	this.TERM_FREQUENCY_CUTOFF = 1; // Ignore terms that have fewer than n occurrences
 	this.SCORE_CUTOFF = 0; // Ignoring terms that score less than n
 
+	this.SINGLE_TERM_BOOST = 0.75;
 	this.WHITE_LIST_BOOST = 1.5; // This boost is applied to all words found in the white list
 	this.CAPITALIZATION_BOOST = 1.75; // This boost is applied once to capitalised tokens, and again if all caps
 	this.NGRAM_BASED_ON_CAPITALISATION_BOOST = 3.5; // This boost is applied to capitalised bi- and trigrams
+	this.SPECIAL_TERM_BOOST = 2.5; // This boost is applied to capitalised bi- and trigrams
 	this.BIGRAM_BOOST = 2.5; // This is applied to bigrams that do not contain stopwords and whose individual tokens are longer than 2 characters
 	this.BIGRAM_ALREADY_DETECTED_BOOST = 0.25; // This boost is applied to all bigrams found to be wholly contained within a compound term detected based on capitalisation
 	this.TERM_FROM_COMPOUND_DOWNWEIGHT = 0.25; // This is applied to individual tokens within an n-gram (every time an n-gram is discovered)
@@ -71,6 +74,8 @@ AUTOTAGS.createTagger = function( parameters ) {
 	// Look for compound terms (bi- and trigrams) based on capitalization, accounting for corner cases like PayPal, McKinley etc.
 	// TODO Need to estimate whether this is too greedy or not
 	this.CAPITALIZED_NGRAM_EXPRESSION = /(([A-Z][a-z]*)?[A-Z][a-z]+ (of )?(Mc|Mac)?[A-Z][a-z]+([ \-][A-Z][a-z]*)?([ ][A-Z][a-z]*)?)/g;
+	// Special Terms Expression to extract e.g. abbreviations and acronyms (with support for CamelCase words like JavaScript)
+	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]{2,})|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
 	// This expression looks for 'short numbers' with less than four digits (this will be included in stopword expression)
 	this.SHORT_NUMBERS_EXPRESSION = '[0-9]{1,3}';
 	
@@ -106,10 +111,14 @@ AUTOTAGS.createTagger.prototype = {
 		var frequencyListSingleTerms = new AUTOTAGS.FrequencyList();
 		var frequencyListCapitalisedCompoundTerms = new AUTOTAGS.FrequencyList();
 		var frequencyListSimpleBigramTerms = new AUTOTAGS.FrequencyList();
+		var frequencyListSpecialTerms = new AUTOTAGS.FrequencyList();
 		
 		// Instance Variables
 		var algorithmTime = 0;
-		
+
+
+
+
 		/*
 		*
 		* Pre-processing text
@@ -127,7 +136,10 @@ AUTOTAGS.createTagger.prototype = {
 		
 		// Splitting tokens into individual terms
 		var tokensToProcess = textWithWhitespaceAndStopwordsRemoved.split(' ');
-		
+
+
+
+
 		/*
 		*
 		* 1st Pass (building the frequency list)
@@ -139,12 +151,27 @@ AUTOTAGS.createTagger.prototype = {
 			var token = tokensToProcess[i];
 			
 			if ( token.length > this.TOKEN_LENGTH_CUTOFF ) {
-				var term = new AUTOTAGS.Term({ 'boost':0.75 });
+				var term = new AUTOTAGS.Term({ 'boost':this.SINGLE_TERM_BOOST });
 				term.setValue( token );
 				term.ignoreTermFreqCutoff = false;
 
 				// Adding the candidate to the frequency list
 				frequencyListSingleTerms.addTerm( term );
+			}
+		}
+		
+		// Identifying all special terms
+		if ( this.EXTRACT_SPECIAL_TERMS ) {
+			var specialTerms = text.match( this.SPECIAL_TERMS_EXPRESSION );
+			if ( specialTerms != null ) {
+				for ( var i = 0, length = specialTerms.length; i < length; i++ ) {
+					var term = new AUTOTAGS.Term({ 'termType': AUTOTAGS.TermConstants.TYPE_SPECIAL_TERM, 'boost':this.SPECIAL_TERM_BOOST });
+					term.setValue( AUTOTAGS.trim(specialTerms[i]) );
+					term.ignoreTermFreqCutoff = true;
+
+					// Adding the candidate to the frequency list
+					frequencyListSpecialTerms.addTerm( term );
+				}
 			}
 		}
 		
@@ -188,7 +215,7 @@ AUTOTAGS.createTagger.prototype = {
 
 
 
-		
+
 		/*
 		*
 		* 2nd Pass (evaluation and scoring of individual and compound terms)
@@ -198,7 +225,7 @@ AUTOTAGS.createTagger.prototype = {
 		var temporaryTagSet = new AUTOTAGS.TagSet();
 		
 		// The order in which the frequency lists are analyzed is important!!!
-		var frequencyLists = [ frequencyListSingleTerms, frequencyListCapitalisedCompoundTerms, frequencyListSimpleBigramTerms ];
+		var frequencyLists = [ frequencyListSpecialTerms, frequencyListCapitalisedCompoundTerms, frequencyListSimpleBigramTerms, frequencyListSingleTerms ];
 		
 		for ( var listId = 0, length = frequencyLists.length; listId < length; listId++ ) {
 			var listBeingProcessed = frequencyLists[listId];
@@ -213,7 +240,36 @@ AUTOTAGS.createTagger.prototype = {
 					* Filtering...removing obvious duplicate terms between across lists and deciding between capitalised
 					* compound terms and bigrams (for which there might exist corresponding entries in both lists)
 					*/
-					if ( term.termType == AUTOTAGS.TermConstants.TYPE_CAPITALISED_COMPOUND_TERM ) {
+					if ( term.termType == AUTOTAGS.TermConstants.TYPE_SPECIAL_TERM ) {
+						var ignoreSpecialTerm = false;
+						// Process all frequency lits but the special term one...
+						for ( var specialTermLookupListId = 0; specialTermLookupListId < length ; specialTermLookupListId++ ) {
+							var specialTermLookupList = frequencyLists[specialTermLookupListId];
+							if ( specialTermLookupList == listBeingProcessed ) {
+								// This is the special term list, move on...
+								continue;
+							} else {
+								// Checking if this special term exists in the list being processed
+								if ( specialTermLookupList.getTermById( term.getTermId() ) != undefined ) {
+									
+									var specialTermInList = specialTermLookupList.getTermById( term.getTermId() );
+									// If a more frequent or higher scoring variant of the special term is found in one of the other lists then ignore this one
+									if ( specialTermInList.freq > term.freq || specialTermInList.getScore() > term.getScore() ) {
+										ignoreSpecialTerm = true;
+										continue;
+									} else {
+										// The special term is more frequent or higher scoring...so delete from the other list
+										specialTermLookupList.deleteTermById( term.getTermId() );
+									}
+								}
+							}
+						}
+						
+						// This Special Term already exists in one of the other frequency lists so will ignore it
+						if ( ignoreSpecialTerm ) {
+							continue;
+						}
+					} else if ( term.termType == AUTOTAGS.TermConstants.TYPE_CAPITALISED_COMPOUND_TERM ) {
 						/*
 						* Checking if term is TYPE_CAPITALISED_COMPOUND_TERM!
 						* These capitalised compounds require special handling. If they exist in the bigram frequency list, they are clearly
@@ -267,6 +323,7 @@ AUTOTAGS.createTagger.prototype = {
 				}
 			}
 		}
+		
 		
 		
 		
@@ -465,6 +522,7 @@ AUTOTAGS.TermConstants = {
 	'TYPE_SINGLE_TERM' : 'TYPE_SINGLE_TERM',
 	'TYPE_CAPITALISED_COMPOUND_TERM' : 'TYPE_CAPITALISED_COMPOUND_TERM',
 	'TYPE_SIMPLE_BIGRAM_TERM' : 'TYPE_SIMPLE_BIGRAM_TERM',
+	'TYPE_SPECIAL_TERM' : 'TYPE_SPECIAL_TERM',
 	'TYPE_TAG_CONSTANT' : 'TYPE_TAG_CONSTANT'
 };
 
