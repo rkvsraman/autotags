@@ -75,7 +75,7 @@ AUTOTAGS.createTagger = function( parameters ) {
 	// TODO Need to estimate whether this is too greedy or not
 	this.CAPITALIZED_NGRAM_EXPRESSION = /(([A-Z][a-z]*)?[A-Z][a-z]+ (of )?(Mc|Mac)?[A-Z][a-z]+([ \-][A-Z][a-z]*)?([ ][A-Z][a-z]*)?)/g;
 	// Special Terms Expression to extract e.g. abbreviations and acronyms (with support for CamelCase words like JavaScript)
-	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]{2,})|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
+	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]+)|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
 	// This expression looks for 'short numbers' with less than four digits (this will be included in stopword expression)
 	this.SHORT_NUMBERS_EXPRESSION = '[0-9]{1,3}';
 	
