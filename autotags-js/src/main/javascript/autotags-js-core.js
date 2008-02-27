@@ -250,16 +250,20 @@ AUTOTAGS.createTagger.prototype = {
 								continue;
 							} else {
 								// Checking if this special term exists in the list being processed
-								if ( specialTermLookupList.getTermById( term.getTermId() ) != undefined ) {
-									
-									var specialTermInList = specialTermLookupList.getTermById( term.getTermId() );
+								var termToLookup = term.getTermId();
+								// I'm maybe being to greedy here - if the special term doesn't exist in it's natural form I try stemming it...
+								if ( specialTermLookupList.getTermById( termToLookup ) == undefined) {
+									termToLookup = AUTOTAGS._stemToken(termToLookup);
+								}
+								if ( specialTermLookupList.getTermById( termToLookup ) != undefined ) {
+									var specialTermInList = specialTermLookupList.getTermById( termToLookup );
 									// If a more frequent or higher scoring variant of the special term is found in one of the other lists then ignore this one
 									if ( specialTermInList.freq > term.freq || specialTermInList.getScore() > term.getScore() ) {
 										ignoreSpecialTerm = true;
 										continue;
 									} else {
 										// The special term is more frequent or higher scoring...so delete from the other list
-										specialTermLookupList.deleteTermById( term.getTermId() );
+										specialTermLookupList.deleteTermById( termToLookup );
 									}
 								}
 							}
@@ -590,7 +594,7 @@ AUTOTAGS.Term.prototype = {
 	},
 	
 	isCompoundTerm : function() {
-		return this.termType != 'TYPE_SINGLE_TERM';
+		return this.termType != AUTOTAGS.TermConstants.TYPE_SINGLE_TERM;
 	},
 	
 	toString : function() {
