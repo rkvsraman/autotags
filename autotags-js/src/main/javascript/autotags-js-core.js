@@ -236,6 +236,7 @@ AUTOTAGS.createTagger.prototype = {
 			// Analyzing all terms within the list
 			for ( var termId in listBeingProcessed.getTerms() ) {
 				var term = listBeingProcessed.getTermById( termId );
+				var ignoreTerm = false;
 
 				if ( (term.freq > this.TERM_FREQUENCY_CUTOFF) || (this.isInWhiteList(term.getValue()) || term.ignoreTermFreqCutoff == true) ) {
 				
@@ -254,15 +255,15 @@ AUTOTAGS.createTagger.prototype = {
 							} else {
 								// Checking if this special term exists in the list being processed
 								var termToLookup = term.getTermId();
-								// I'm maybe being to greedy here - if the special term doesn't exist in it's natural form I try stemming it...
-								if ( specialTermLookupList.getTermById( termToLookup ) == undefined) {
+								// I'm maybe being to greedy here - if the special term doesn't exist in it's natural form in the single term list I try stemming it...
+								if ( specialTermLookupList == frequencyListSingleTerms && specialTermLookupList.getTermById( termToLookup ) == undefined) {
 									termToLookup = AUTOTAGS._stemToken(termToLookup);
 								}
 								if ( specialTermLookupList.getTermById( termToLookup ) != undefined ) {
 									var specialTermInList = specialTermLookupList.getTermById( termToLookup );
 									// If a more frequent or higher scoring variant of the special term is found in one of the other lists then ignore this one
-									if ( specialTermInList.freq > term.freq || specialTermInList.getScore() > term.getScore() ) {
-										ignoreSpecialTerm = true;
+									if ( specialTermInList.getScore() > term.getScore() ) {
+										ignoreTerm = true;
 										continue;
 									} else {
 										// The special term is more frequent or higher scoring...so delete from the other list
@@ -270,11 +271,6 @@ AUTOTAGS.createTagger.prototype = {
 									}
 								}
 							}
-						}
-						
-						// This Special Term already exists in one of the other frequency lists so will ignore it
-						if ( ignoreSpecialTerm ) {
-							continue;
 						}
 					} else if ( term.termType == AUTOTAGS.TermConstants.TYPE_CAPITALISED_COMPOUND_TERM ) {
 						/*
@@ -286,7 +282,7 @@ AUTOTAGS.createTagger.prototype = {
 						if ( frequencyListSimpleBigramTerms.getTermById( term.getTermId() ) != undefined ) {
 							// The capitalised compound term exists as a bigram
 							var bigram = frequencyListSimpleBigramTerms.getTermById( term.getTermId() );
-
+							
 							if ( bigram.freq > term.freq ) {
 								// There are more bigram variants than compound ones. I will therefore ignore the compound one since
 								// it may e.g. have been capitalised in a title.
@@ -322,9 +318,9 @@ AUTOTAGS.createTagger.prototype = {
 					if ( this.LOWERCASE ) {
 						term.setValue( term.getValue().toLowerCase() );
 					}
-					
+
 					// Adding the term to final stage evaluation if it meets the SCORE_CUTOFF criteria
-					if ( term.getScore() > this.SCORE_CUTOFF ) {
+					if ( !ignoreTerm && term.getScore() > this.SCORE_CUTOFF ) {
 						temporaryTagSet.addTag( term );
 					}	
 				}
