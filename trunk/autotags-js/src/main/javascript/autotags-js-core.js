@@ -73,9 +73,9 @@ AUTOTAGS.createTagger = function( parameters ) {
 	this.WHITESPACE_EXPRESSION = /(\')?([^a-zA-Z0-9_\.\!\?\:\;\n\r\f\t])/g;
 	// Look for compound terms (bi- and trigrams) based on capitalization, accounting for corner cases like PayPal, McKinley etc.
 	// TODO Need to estimate whether this is too greedy or not
-	this.CAPITALIZED_NGRAM_EXPRESSION = /(([A-Z][a-z]*)?[A-Z][a-z]+ (of )?(Mc|Mac)?[A-Z][a-z]+([ \-][A-Z][a-z]*)?([ ][A-Z][a-z]*)?)/g;
+	this.CAPITALIZED_NGRAM_EXPRESSION = /(([A-Z][a-z]*)?[A-Z][a-z]+ (of )?(Mc|Mac)?[A-Z][a-z]+([ \-][A-Z][a-z]+)?([ ][A-Z][a-z]+)?)/g;
 	// Special Terms Expression to extract e.g. abbreviations and acronyms (with support for CamelCase words like JavaScript)
-	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]+)|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
+	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]+)|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
 	// This expression looks for 'short numbers' with less than four digits (this will be included in stopword expression)
 	this.SHORT_NUMBERS_EXPRESSION = '[0-9]{1,3}';
 	
@@ -182,7 +182,7 @@ AUTOTAGS.createTagger.prototype = {
 			for ( var i = 0, length = capitalizedNGrams.length; i < length; i++ ) {
 				var compoundTermValue = capitalizedNGrams[i];
 
-				// The compound term should not start with a word from the blacklist
+				// The compound term should not start with a word from the blacklist, I try removing it and see what I'm left with.
 				var compoundTermArray = compoundTermValue.split(' ');
 				if ( this.isInBlackList( compoundTermArray[0] ) ) {
 					compoundTermValue = compoundTermValue.substr( compoundTermValue.indexOf(' ') + 1 );
@@ -279,20 +279,30 @@ AUTOTAGS.createTagger.prototype = {
 						* bigrams and therefore we should consider which frequency number to use, since there clearly might be more instances if
 						* we ignore case.
 						*/
-						if ( frequencyListSimpleBigramTerms.getTermById( term.getTermId() ) != undefined ) {
+						var bigram = frequencyListSimpleBigramTerms.getTermById( term.getTermId() );
+						
+						if ( bigram != undefined ) {
 							// The capitalised compound term exists as a bigram
-							var bigram = frequencyListSimpleBigramTerms.getTermById( term.getTermId() );
-							
 							if ( bigram.freq > term.freq ) {
 								// There are more bigram variants than compound ones. I will therefore ignore the compound one since
 								// it may e.g. have been capitalised in a title.
 								// Adding a boost to the upcoming bigram variant since it's clearly more than just a normal bigram
 								bigram.addBoost( this.CAPITALIZATION_BOOST );
-
-								continue;
+								ignoreTerm = true;
 							} else {
 								// There is an equal or less number of bigrams, therefore I remove the bigram and go with the capitalised variant
 								frequencyListSimpleBigramTerms.deleteTermById( term.getTermId() );
+							}
+						}
+						
+						// Now checking if it exists as a simple term (that might happen if I remove blacklisted word at the front)
+						var simpleTerm = frequencyListSingleTerms.getTermById( term.getTermId() );
+						if ( !ignoreTerm && simpleTerm != undefined ) {
+							if ( simpleTerm.getScore() > term.getScore() ) {
+								simpleTerm.addBoost( this.CAPITALIZATION_BOOST );
+								ignoreTerm = true;
+							} else {
+								frequencyListSingleTerms.deleteTermById( term.getTermId() );
 							}
 						}
 					}
