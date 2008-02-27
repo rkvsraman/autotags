@@ -183,14 +183,17 @@ AUTOTAGS.createTagger.prototype = {
 				var compoundTermValue = capitalizedNGrams[i];
 
 				// The compound term should not start with a word from the blacklist
-				if ( !this.isInBlackList( compoundTermValue.split(' ')[0] ) ) {
-					var term = new AUTOTAGS.Term({ 'termType': AUTOTAGS.TermConstants.TYPE_CAPITALISED_COMPOUND_TERM, 'boost':this.NGRAM_BASED_ON_CAPITALISATION_BOOST });
-					term.setValue( compoundTermValue );
-					term.ignoreTermFreqCutoff = true;
-
-					// Adding the candidate to the frequency list
-					frequencyListCapitalisedCompoundTerms.addTerm( term );
+				var compoundTermArray = compoundTermValue.split(' ');
+				if ( this.isInBlackList( compoundTermArray[0] ) ) {
+					compoundTermValue = compoundTermValue.substr( compoundTermValue.indexOf(' ') + 1 );
 				}
+				
+				var term = new AUTOTAGS.Term({ 'termType': AUTOTAGS.TermConstants.TYPE_CAPITALISED_COMPOUND_TERM, 'boost':this.NGRAM_BASED_ON_CAPITALISATION_BOOST });
+				term.setValue( compoundTermValue );
+				term.ignoreTermFreqCutoff = true;
+
+				// Adding the candidate to the frequency list
+				frequencyListCapitalisedCompoundTerms.addTerm( term );
 			}
 		}
 		
