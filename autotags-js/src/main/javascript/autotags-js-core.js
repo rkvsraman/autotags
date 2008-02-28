@@ -18,7 +18,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
-*	@version 1.1
+*	@version 1.2
 *
 *	TODO Remove redundant lowercasing
 *	TODO Choose best inflection after stemming (based on frequency)
@@ -32,7 +32,7 @@
 
 var AUTOTAGS = {
 	'NAME' : 'AutoTags',
-	'VERSION' : 1.1,
+	'VERSION' : 1.2,
 	'DEFAULT_COMPOUND_TAG_SEPARATOR' : ' ',
 	'APPLY_STEMMING' : true, // If true then the Porter stemmer should be applied to all tokens (but not phrases or n-grams), this has some overhead
 	'BOUNDARY' : '##!##' // Compound terms will not be created across BOUNDARIES
@@ -75,7 +75,7 @@ AUTOTAGS.createTagger = function( parameters ) {
 	// TODO Need to estimate whether this is too greedy or not
 	this.CAPITALIZED_NGRAM_EXPRESSION = /(([A-Z][a-z]*)?[A-Z][a-z]+ (of )?(Mc|Mac)?[A-Z][a-z]+([ \-][A-Z][a-z]+)?([ ][A-Z][a-z]+)?)/g;
 	// Special Terms Expression to extract e.g. abbreviations and acronyms (with support for CamelCase words like JavaScript)
-	this.SPECIAL_TERMS_EXPRESSION = /\b(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]+)|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
+	this.SPECIAL_TERMS_EXPRESSION = /\b([A-Za-z]{1,2}\-[A-Za-z]+)|(([A-Z]\.){2,})|((([A-Z][A-Z0-9\-\:\_\+]+)|([A-Z]+[a-z]*?[A-Z][a-z]*?))( [A-Z][A-Za-z]+)?( [A-Z][A-Za-z]+)?( [0-9]*(\.[0-9]*)?)?)\b/g;
 	// This expression looks for 'short numbers' with less than four digits (this will be included in stopword expression)
 	this.SHORT_NUMBERS_EXPRESSION = '[0-9]{1,3}';
 	
