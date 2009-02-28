@@ -18,7 +18,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
-*	@version 1.2
+*	@version 1.3
 *
 *	TODO Remove redundant lowercasing
 *	TODO Choose best inflection after stemming (based on frequency)
@@ -32,7 +32,7 @@
 
 var AUTOTAGS = {
 	'NAME' : 'AutoTags',
-	'VERSION' : 1.2,
+	'VERSION' : 1.3,
 	'DEFAULT_COMPOUND_TAG_SEPARATOR' : ' ',
 	'APPLY_STEMMING' : true, // If true then the Porter stemmer should be applied to all tokens (but not phrases or n-grams), this has some overhead
 	'BOUNDARY' : '##!##' // Compound terms will not be created across BOUNDARIES
@@ -402,7 +402,8 @@ AUTOTAGS.createTagger.prototype = {
 				// Checking if this simple term is found within a higher scoring bigram
 				// If it is found in the temporary array of split bigrams it means that it has a lower score
 				// since the bigram was processed before it.
-				if ( AUTOTAGS.APPLY_STEMMING ) termValue = AUTOTAGS._stemToken(term.getValue());
+				var termValue = term.getValue();
+				if ( AUTOTAGS.APPLY_STEMMING ) termValue = AUTOTAGS._stemToken(termValue);
 				if ( AUTOTAGS._arrayContains( temporaryArrayOfSplitBigrams, termValue ) ) {
 					term.addBoost( this.TERM_FROM_COMPOUND_DOWNWEIGHT );
 				}
@@ -473,14 +474,14 @@ AUTOTAGS.createTagger.prototype = {
 	isInWhiteList : function( term ) {
 		// Whitelist lookup with caching
 		// In case the same words are prevalent in the text I can avoid looking them up again
-		if ( this.whitelistCache[term] != undefined ) {
-			return this.whitelistCache[term];
+		if ( this.whitelistCache['_' + term] != undefined ) {
+			return this.whitelistCache['_' + term];
 		} else {
 			try {
 				var inWhiteList = false;
 				if ( AUTOTAGS.WHITELIST != undefined ) {
 					inWhiteList = AUTOTAGS._arrayContains( AUTOTAGS.WHITELIST, term.toLowerCase() );
-					this.whitelistCache[term] = inWhiteList;
+					this.whitelistCache['_' + term] = inWhiteList;
 				}
 				return inWhiteList;
 			} catch ( e ) {
@@ -579,23 +580,20 @@ AUTOTAGS.Term.prototype = {
 	
 	setValue : function( value ) {
 		this._term = value;
-		this._setTermId();
+		this._setTermId(value);
 	},
 	
 	getTermId : function() {
 		return this._termId;
 	},
 	
-	_setTermId : function() {
+	_setTermId : function( value ) {
 		// If this is a single token and stemming should be applied then modify the termID
 		if ( AUTOTAGS.APPLY_STEMMING && !this.isCompoundTerm() ) {
-			this._termId = AUTOTAGS._stemToken( this.getValue() );
+			this._termId = '_' + AUTOTAGS._stemToken( value );
 		} else {
-			this._termId = this.getValue();
+			this._termId = '_' + value.toLowerCase();
 		}
-
-		// Lowercasing the key to the term in the frequency list
-		this._termId = this._termId.toLowerCase();
 	},
 	
 	getTermType : function() {
@@ -734,15 +732,17 @@ AUTOTAGS.FrequencyList.prototype = {
 AUTOTAGS._stemToken = function( token ) {
 	token = token.toLowerCase();
 	// Find the root of words and cache since stemming is fairly expensive in this context
-	if ( AUTOTAGS.VARIATION_CACHE[token] != undefined ) {
+	if ( AUTOTAGS.VARIATION_CACHE['_' + token] != undefined ) {
 		// Token is found in the cache
-		return AUTOTAGS.VARIATION_CACHE[token];
+		var stemmedVariant = AUTOTAGS.VARIATION_CACHE['_' + token];
+		return stemmedVariant;
 	} else {
 		// Token not in the cache, stemming and adding to the cache
 		try {
 			var stemmerImpl = AUTOTAGS._getStemmerImpl();
 			var stemmedVariant = stemmerImpl( token );
-			AUTOTAGS.VARIATION_CACHE[token] = stemmedVariant;
+			
+			AUTOTAGS.VARIATION_CACHE['_' + token] = stemmedVariant;
 			
 			return stemmedVariant;
 		} catch ( e ) {

@@ -13,7 +13,7 @@ AUTOTAGS.BLACKLIST = { 'a':true,'about':true,'above':true,'across':true,'after':
 	'co':true,'combines':true,'coming':true,'computer':true,'con':true,'could':true,'couldnt':true,'cry':true,'currently':true,'de':true,'describe':true,'detail':true,
 	'did':true,'didn':true,'do':true,'does':true,'doesn':true,'don':true,'done':true,'down':true,'due':true,'during':true,'each':true,'eg':true,'eight':true,'either':true,'eleven':true,
 	'else':true,'elsewhere':true,'empty':true,'end':true,'enough':true,'especially':true,'etc':true,'even':true,'ever':true,'every':true,'everyone':true,'everything':true,
-	'everywhere':true,'except':true,'far':true,'few':true,'fifteen':true,'fify':true,'fill':true,'find':true,'fire':true,'first':true,'five':true,'for':true,'former':true,
+	'everywhere':true,'except':true,'far':true,'few':true,'fifteen':true,'fify':true,'fill':true,'find':true,'first':true,'five':true,'for':true,'former':true,
 	'formerly':true,'forty':true,'found':true,'four':true,'from':true,'front':true,'full':true,'further':true,'get':true,'give':true,'gmt':true,'go':true,'going':true,'got':true,
 	'had':true,'has':true,'hasnt':true,'have':true,'having':true,'he':true,'hello':true,'hence':true,'her':true,'here':true,'hereafter':true,'hereby':true,'herein':true,'hereupon':true,
 	'hers':true,'herself':true,'hi':true,'him':true,'himself':true,'his':true,'how':true,'however':true,'hundred':true,'i':true,'ie':true,'if':true,'in':true,'inc':true,'include':true,'includes':true,
